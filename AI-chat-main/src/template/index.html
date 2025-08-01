@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat Constitución de Colombia</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <style type="text/tailwindcss">
+      @theme {
+        --colombia-yellow: #ffe600;
+        --colombia-blue: #204ecf;
+        --colombia-red: #e9151b;
+        --color-bg-dark: #10172a; /* Azul muy oscuro */
+        --color-bg-chat: #15224b; /* Azul bandera más claro */
+        --color-msg-other: #204ecf; /* Azul bandera */
+        --color-msg-me: #ffe600; /* Amarillo bandera */
+        --color-msg-me-text: #222; /* Texto oscuro para amarillo */
+        --color-border: #e9151b; /* Rojo bandera */
+      }
+      body {
+        background: linear-gradient(135deg, var(--color-bg-dark), var(--colombia-blue) 120%);
+      }
+      #chat-messages {
+        scrollbar-width: thin;
+        scrollbar-color: #ffe600 #15224b;
+      }
+      #chat-messages::-webkit-scrollbar {
+        width: 8px;
+        background: transparent;
+      }
+      #chat-messages::-webkit-scrollbar-track {
+        background: #15224b;
+        border-radius: 8px;
+      }
+      #chat-messages::-webkit-scrollbar-thumb {
+        border-radius: 8px;
+        min-height: 40px;
+        border: 2px solid #15224b;
+        background: linear-gradient(
+          to bottom,
+          #ffe600 0%,
+          #ffe600 33.33%,
+          #204ecf 33.33%,
+          #204ecf 66.66%,
+          #e9151b 66.66%,
+          #e9151b 100%
+        );
+        transition: background 0.3s;
+      }
+      #chat-messages::-webkit-scrollbar-thumb:hover {
+        filter: brightness(1.1);
+      }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center bg-[var(--color-bg-dark)] text-white">
+    <div class="w-full max-w-2xl h-[90vh] flex flex-col rounded-2xl shadow-2xl bg-[var(--color-bg-chat)] border border-[var(--color-border)]">
+        <!-- Header con bandera de Colombia -->
+        <div class="p-4 border-b border-[var(--color-border)] flex flex-col gap-2">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <span class="text-2xl">📜</span>
+                    <span class="font-bold text-lg text-[var(--colombia-yellow)]">Chat Constitución de Colombia</span>
+                </div>
+                <span class="text-xs text-[var(--colombia-yellow)]">Pregúntame sobre la Constitución</span>
+            </div>
+            <!-- Bandera de Colombia -->
+            <div class="flex h-2 w-full rounded overflow-hidden shadow mt-2">
+                <div class="flex-1 bg-[var(--colombia-yellow)]"></div>
+                <div class="flex-1 bg-[var(--colombia-blue)]"></div>
+                <div class="flex-1 bg-[var(--colombia-red)]"></div>
+            </div>
+        </div>
+        <!-- Chat messages -->
+        <div id="chat-messages" class="flex-1 overflow-y-auto p-4 flex flex-col gap-3">
+            <!-- Mensajes se agregan aquí -->
+        </div>
+        <!-- Input y reinicio -->
+        <form id="chat-form" class="p-4 border-t border-[var(--color-border)] flex gap-2 bg-[var(--color-bg-chat)]">
+            <input id="chat-input" type="text" placeholder="Escribe tu pregunta sobre la Constitución..." class="flex-1 rounded-lg px-4 py-2 bg-[var(--color-msg-other)] text-white focus:outline-none focus:ring-2 focus:ring-[var(--color-msg-me)]" autocomplete="off" required />
+            <button id="send-btn" type="submit" class="bg-[var(--color-msg-me)] hover:bg-[var(--colombia-red)] text-[var(--color-msg-me-text)] px-4 py-2 rounded-lg font-bold transition">Enviar</button>
+            <button id="reset-btn" type="button" class="bg-transparent border border-[var(--color-border)] text-[var(--color-border)] px-4 py-2 rounded-lg font-bold transition hover:bg-[var(--colombia-red)] hover:text-white">Reiniciar</button>
+        </form>
+    </div>
+    <script>
+      const chatMessages = document.getElementById('chat-messages');
+      const chatForm = document.getElementById('chat-form');
+      const chatInput = document.getElementById('chat-input');
+      const sendBtn = document.getElementById('send-btn');
+      const resetBtn = document.getElementById('reset-btn');
+
+      function addMessage(text, fromMe = false, isThinking = false) {
+        const msgDiv = document.createElement('div');
+        msgDiv.className = `flex ${fromMe ? 'justify-end' : 'justify-start'}`;
+        msgDiv.innerHTML = `
+          <div class="max-w-[70%] px-4 py-2 rounded-2xl shadow-md text-sm ${
+            fromMe
+              ? 'bg-[var(--color-msg-me)] text-[var(--color-msg-me-text)]'
+              : 'bg-[var(--color-msg-other)] text-white'
+          }">
+            ${isThinking ? '<span class="animate-pulse">🤔 <span class="italic">Pensando...</span></span>' : text}
+          </div>
+        `;
+        chatMessages.appendChild(msgDiv);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+      }
+
+      function showWelcome() {
+        const welcome = document.createElement('div');
+        welcome.className = 'flex justify-center';
+        welcome.innerHTML = `
+          <div class="max-w-[80%] px-4 py-3 rounded-2xl shadow text-center bg-[var(--color-msg-other)] text-white text-base">
+            <b>Bienvenido al Chat de la Constitución de Colombia 🇨🇴</b><br>
+            Haz preguntas sobre artículos, derechos, deberes, historia y temas relacionados con la Constitución Política de Colombia. ¡Estoy aquí para ayudarte!
+          </div>
+        `;
+        chatMessages.appendChild(welcome);
+      }
+
+      // Mostrar mensaje de inicio si no hay mensajes
+      function checkWelcome() {
+        if (chatMessages.children.length === 0) {
+          showWelcome();
+        }
+      }
+
+      // Inicial
+      checkWelcome();
+
+      chatForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        // Si es el primer mensaje, borra el mensaje de bienvenida
+        if (chatMessages.children.length === 1 && chatMessages.firstChild.textContent.includes('Bienvenido al Chat')) {
+          chatMessages.innerHTML = '';
+        }
+        const userMsg = chatInput.value.trim();
+        if (!userMsg) return;
+        addMessage(userMsg, true);
+        chatInput.value = '';
+        sendBtn.disabled = true;
+        // Mostrar "pensando"
+        addMessage('', false, true);
+        // Enviar mensaje al backend
+        fetch('/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message: userMsg })
+        })
+        .then(res => res.json())
+        .then(data => {
+          // Eliminar el mensaje "pensando"
+          chatMessages.removeChild(chatMessages.lastChild);
+          // Agregar respuesta real
+          addMessage(data.response, false);
+        })
+        .catch(() => {
+          chatMessages.removeChild(chatMessages.lastChild);
+          addMessage('Error al obtener respuesta.', false);
+        })
+        .finally(() => {
+          sendBtn.disabled = false;
+          chatInput.focus();
+        });
+      });
+
+      resetBtn.addEventListener('click', function() {
+        chatMessages.innerHTML = '';
+        chatInput.value = '';
+        chatInput.focus();
+        showWelcome();
+      });
+    </script>
+</body>
+</html> 
